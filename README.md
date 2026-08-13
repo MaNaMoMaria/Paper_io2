@@ -2,7 +2,6 @@
 
 A real-time multiplayer-style territory conquest game inspired by classic io mechanics (such as Paper.io), built from scratch using **HTML5 Canvas** and **JavaScript**. Designed with custom UI scaling, smooth grid-based logic, and intelligent bot AI.
 
-![Game Preview](images/City01.png)
 
 ## 🚀 Key Features
 
