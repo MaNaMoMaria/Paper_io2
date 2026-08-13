@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realm Conquest - Medieval Edition</title>
+  <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: #0d0e12;
+            color: #f1f5f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-wrapper {
+            position: relative;
+            border: 8px solid #2d2118;
+            border-radius: 16px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+            background: #111;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            background-color: #05070a;
+            cursor: crosshair;
+        }
+
+        /* Top HUD Elements */
+        #ui-header {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        #speed-container {
+            width: 320px;
+            height: 105px;
+            background-image: url('images/SpeedFrame.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-left: 65px;
+            padding-top: 5px;
+            pointer-events: none;
+        }
+
+        #speed-title {
+            color: #fef08a;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+            margin-bottom: 2px;
+        }
+
+        #speed-val {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 900;
+            text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Leaderboard HUD */
+        #leaderboard {
+            background: rgba(22, 16, 12, 0.92);
+            border: 3px solid #6b4d32;
+            border-radius: 12px;
+            padding: 14px 20px;
+            min-width: 240px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .leader-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #1e1b18;
+            border: 1px solid #4a3525;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            transition: width 0.2s ease;
+        }
+
+        /* Menu Overlay */
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 8, 6, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        #overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #game-title {
+            font-size: 38px;
+            font-weight: 900;
+            color: #fef08a;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.9), 0 0 20px rgba(234, 179, 8, 0.3);
+            text-align: center;
+        }
+
+        /* Wooden Buttons */
+        .btn-wooden-start {
+            width: 320px;
+            height: 90px;
+            background: url('images/NewGame01.png') no-repeat center / contain;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s ease, filter 0.1s ease;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.7));
+        }
+
+        .btn-wooden-start:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.9)) brightness(1.1);
+        }
+
+        .btn-wooden-start:active {
+            transform: scale(0.97);
+        }
+
+        .btn-wooden-exit {
+            width: 320px;
+            height: 90px;
+            background: url('images/Exit01.png') no-repeat center / contain;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s ease, filter 0.1s ease;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.7));
+        }
+
+        .btn-wooden-exit:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.9)) brightness(1.1);
+        }
+
+        .btn-wooden-exit:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body>
+
+  <div id="game-wrapper">
+    <div id="ui-header">
+      <!-- اصلاح شده: استفاده از کادر گرافیکی SpeedFrame برای سرعت -->
+      <div id="speed-container">
+        <div id="speed-title">CONQUEST SPEED</div>
+        <div><span id="speed-val">1.0</span>x</div>
+      </div>
+
+      <div id="leaderboard">
+        <!-- Dynamic Leaderboard Content -->
+      </div>
+    </div>
+
+    <!-- Main Menu / Overlay -->
+    <div id="overlay" class="active">
+      <h1 id="game-title">REALM CONQUEST</h1>
+      <p style="color: #cbd5e1; font-size: 16px; text-shadow: 1px 1px 2px #000;">Capture territory to reveal your map realm!</p>
+      
+      <button class="btn-wooden-start" id="start-btn" aria-label="New Game"></button>
+      <button class="btn-wooden-exit" id="exit-btn" aria-label="Exit Game" style="display: none;"></button>
+    </div>
+
+    <canvas id="gameCanvas" width="1200" height="700"></canvas>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
